@@ -140,7 +140,7 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const j=pm.response.json(); if(j.data&&j.data._id) pm.collectionVariables.set('categoryId', j.data._id);"
+                  "const j=pm.response.json(); if(j.data&&j.data.id) pm.collectionVariables.set('categoryId', j.data.id);"
                 ],
                 "type": "text/javascript"
               }
@@ -342,7 +342,7 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const j=pm.response.json(); if(j.data&&j.data._id) pm.collectionVariables.set('courseId', j.data._id);"
+                  "const j=pm.response.json(); if(j.data&&j.data.id) pm.collectionVariables.set('courseId', j.data.id);"
                 ],
                 "type": "text/javascript"
               }

@@ -1,12 +1,14 @@
-const mongoose = require('mongoose');
+const JsonStore = require('../../utils/jsonStore');
 
-const categorySchema = new mongoose.Schema(
-  {
-    name: { type: String, required: [true, 'Category name is required'], unique: true, trim: true },
-    description: { type: String, trim: true, default: '' },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  },
-  { timestamps: true }
-);
+const store = new JsonStore('categories');
 
-module.exports = mongoose.model('Category', categorySchema);
+const Category = {
+  findAll: () => store.findAll().reverse(),
+  findById: (id) => store.findById(id),
+  findByName: (name) => store.findOne((c) => c.name.toLowerCase() === name.trim().toLowerCase()),
+  create: (data) => store.create(data),
+  update: (id, data) => store.update(id, data),
+  delete: (id) => store.delete(id),
+};
+
+module.exports = Category;

@@ -1,17 +1,21 @@
-const mongoose = require('mongoose');
+const JsonStore = require('../../utils/jsonStore');
+const Category = require('../category/category.model');
 
-const courseSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: [true, 'Course title is required'], trim: true },
-    description: { type: String, required: [true, 'Course description is required'], trim: true },
-    price: { type: Number, required: [true, 'Price is required'], min: [0, 'Price cannot be negative'] },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: [true, 'Category is required'] },
-    instructor: { type: String, trim: true, default: '' },
-    duration: { type: String, trim: true, default: '' },
-    level: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  },
-  { timestamps: true }
-);
+const store = new JsonStore('courses');
 
-module.exports = mongoose.model('Course', courseSchema);
+// attach category {id, name} to a course
+const withCategory = (course) => {
+  if (!course) return null;
+  const cat = Category.findById(course.categoryId);
+  return { ...course, category: cat ? { id: cat.id, name: cat.name } : null };
+};
+
+const Course = {
+  findAll: (predicate) => store.findAll(predicate).reverse().map(withCategory),
+  findById: (id) => withCategory(store.findById(id)),
+  create: (data) => withCategory(store.create(data)),
+  update: (id, data) => withCategory(store.update(id, data)),
+  delete: (id) => store.delete(id),
+};
+
+module.exports = Course;

@@ -12,9 +12,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
   const token = header.split(' ')[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  const user = await User.findById(decoded.id);
+  const user = User.findById(decoded.id);
   if (!user) throw new ApiError(401, 'User no longer exists');
 
-  req.user = user;
+  req.user = User.toPublic(user);
   next();
 });

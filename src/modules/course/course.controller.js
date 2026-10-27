@@ -7,49 +7,62 @@ const asyncHandler = require('../../utils/asyncHandler');
 exports.createCourse = asyncHandler(async (req, res) => {
   const { title, description, price, category, instructor, duration, level } = req.body;
 
-  const cat = await Category.findById(category);
-  if (!cat) throw new ApiError(404, 'Category not found');
+  if (!Category.findById(category)) throw new ApiError(404, 'Category not found');
 
-  const course = await Course.create({
-    title, description, price, category, instructor, duration, level, createdBy: req.user._id,
+  const course = Course.create({
+    title,
+    description,
+    price: Number(price),
+    categoryId: category,
+    instructor: instructor || '',
+    duration: duration || '',
+    level: level || 'beginner',
+    createdBy: req.user.id,
   });
   res.status(201).json({ success: true, message: 'Course created', data: course });
 });
 
 // GET /api/courses?category=<id>&search=<text>
 exports.getCourses = asyncHandler(async (req, res) => {
-  const filter = {};
-  if (req.query.category) filter.category = req.query.category;
-  if (req.query.search) filter.title = { $regex: req.query.search, $options: 'i' };
-
-  const courses = await Course.find(filter).populate('category', 'name').sort({ createdAt: -1 });
+  const { category, search } = req.query;
+  const courses = Course.findAll(
+    (c) =>
+      (!category || c.categoryId === category) &&
+      (!search || c.title.toLowerCase().includes(String(search).toLowerCase()))
+  );
   res.status(200).json({ success: true, count: courses.length, data: courses });
 });
 
 // GET /api/courses/:id
 exports.getCourse = asyncHandler(async (req, res) => {
-  const course = await Course.findById(req.params.id).populate('category', 'name');
+  const course = Course.findById(req.params.id);
   if (!course) throw new ApiError(404, 'Course not found');
   res.status(200).json({ success: true, data: course });
 });
 
 // PUT /api/courses/:id
 exports.updateCourse = asyncHandler(async (req, res) => {
-  if (req.body.category) {
-    const cat = await Category.findById(req.body.category);
-    if (!cat) throw new ApiError(404, 'Category not found');
+  if (!Course.findById(req.params.id)) throw new ApiError(404, 'Course not found');
+
+  const { title, description, price, category, instructor, duration, level } = req.body;
+  const changes = {};
+  if (title !== undefined) changes.title = title;
+  if (description !== undefined) changes.description = description;
+  if (price !== undefined) changes.price = Number(price);
+  if (instructor !== undefined) changes.instructor = instructor;
+  if (duration !== undefined) changes.duration = duration;
+  if (level !== undefined) changes.level = level;
+  if (category !== undefined) {
+    if (!Category.findById(category)) throw new ApiError(404, 'Category not found');
+    changes.categoryId = category;
   }
-  const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  if (!course) throw new ApiError(404, 'Course not found');
+
+  const course = Course.update(req.params.id, changes);
   res.status(200).json({ success: true, message: 'Course updated', data: course });
 });
 
 // DELETE /api/courses/:id
 exports.deleteCourse = asyncHandler(async (req, res) => {
-  const course = await Course.findByIdAndDelete(req.params.id);
-  if (!course) throw new ApiError(404, 'Course not found');
+  if (!Course.delete(req.params.id)) throw new ApiError(404, 'Course not found');
   res.status(200).json({ success: true, message: 'Course deleted' });
 });

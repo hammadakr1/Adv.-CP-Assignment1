@@ -1,30 +1,26 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const JsonStore = require('../../utils/jsonStore');
 
-const userSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: [true, 'Name is required'], trim: true },
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: { type: String, required: [true, 'Password is required'], minlength: 6, select: false },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+const store = new JsonStore('users');
+
+const User = {
+  findById: (id) => store.findById(id),
+  findByEmail: (email) => store.findOne((u) => u.email === email.toLowerCase().trim()),
+
+  async create({ name, email, password }) {
+    const hashed = await bcrypt.hash(password, 10);
+    return store.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashed,
+      role: 'user',
+    });
   },
-  { timestamps: true }
-);
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
+  matchPassword: (user, plain) => bcrypt.compare(plain, user.password),
 
-userSchema.methods.matchPassword = function (plain) {
-  return bcrypt.compare(plain, this.password);
+  // never send the password hash to the client
+  toPublic: (u) => ({ id: u.id, name: u.name, email: u.email, role: u.role }),
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

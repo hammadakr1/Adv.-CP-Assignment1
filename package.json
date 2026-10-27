@@ -1,7 +1,7 @@
 {
   "name": "course-api",
   "version": "1.0.0",
-  "description": "REST API with Express.js, Modular MVC: Auth, Category and Course modules",
+  "description": "REST API with Express.js, Modular MVC: Auth, Category and Course modules (no database install needed)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,7 +15,6 @@
     "express": "^4.19.2",
     "express-validator": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.5.1",
     "morgan": "^1.10.0"
   },
   "devDependencies": {

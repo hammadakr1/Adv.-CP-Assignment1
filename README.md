@@ -1,19 +1,20 @@
 # Course API – Express.js + Modular MVC
 
 REST API with **Authentication**, **Category CRUD** and **Course CRUD**.
-Stack: Node.js, Express, MongoDB (Mongoose), JWT, bcryptjs, express-validator.
+Stack: Node.js, Express, JWT, bcryptjs, express-validator.
+**No database install needed** - data is saved in simple JSON files inside the `data/` folder.
 
 ## Folder Structure
 ```
 course-api/
 ├── server.js                  # entry point (DB connect + listen)
-├── .env                       # PORT, MONGO_URI, JWT_SECRET
+├── .env                       # PORT, JWT_SECRET
+├── data/                      # JSON file storage (users.json, categories.json, courses.json)
 ├── postman/                   # importable Postman collection
 └── src/
     ├── app.js                 # express app, route mounting
-    ├── config/db.js           # MongoDB connection
     ├── middleware/            # auth (JWT), validate (400), notFound (404), errorHandler
-    ├── utils/                 # asyncHandler, ApiError
+    ├── utils/                 # asyncHandler, ApiError, jsonStore (file storage)
     └── modules/
         ├── auth/              # model, controller, routes, validation
         ├── category/          # model, controller, routes, validation
@@ -25,8 +26,7 @@ course-api/
 npm install
 npm run dev        # or: npm start
 ```
-MongoDB must be running (local `mongodb://127.0.0.1:27017/course_api`)
-or put your MongoDB Atlas connection string in `.env` as `MONGO_URI`.
+Server runs at `http://localhost:5000`. No MongoDB or other software is required.
 
 ## Endpoints
 | Method | URL | Auth | Description |
